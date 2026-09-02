@@ -74,53 +74,13 @@ border-radius:14px;padding:14px;text-align:center}
 .empty{text-align:center;color:var(--mut);padding:24px 8px;font-size:13.5px}
 .badge-an{background:#eef3f9;border:1px solid #cfdcea;color:var(--pri2);
 border-radius:8px;padding:2px 8px;font-weight:700;font-size:12.5px}
-/* --- Login --- */
-#login{position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#0f2d4a,#1b4d7e 60%,#00a3a3);
-display:flex;align-items:center;justify-content:center;padding:20px}
-#login .box{background:#fff;border-radius:20px;padding:26px 22px;max-width:400px;width:100%;
-box-shadow:0 18px 50px rgba(0,0,0,.3)}
-#login h2{margin:0 0 4px;font-size:19px;color:var(--pri);text-align:center}
-#login p.sub{margin:0 0 18px;text-align:center;font-size:12.5px;color:var(--mut)}
-#login .err{background:#fff0f0;color:#7d1414;border-radius:9px;padding:9px 12px;
-font-size:13px;margin-bottom:11px;display:none}
-.role-chip{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);
-color:#fff;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:600;margin-left:6px}
-.hidden{display:none !important}
-.userbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
-.userbar button{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
-color:#fff;border-radius:8px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer}
-/* --- INR chart --- */
-.chartbox{width:100%;overflow-x:auto}
-svg.inr{width:100%;min-width:330px;height:250px;display:block}
-.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--mut);margin-top:8px}
-.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-2px}
 </style>
 </head>
 <body>
-<!-- วางก่อน <header> -->
-<div id="login">
-  <div class="box">
-    <div style="text-align:center;font-size:38px">🩺</div>
-    <h2>Warfarin Food Alert System</h2>
-    <p class="sub">ระบบ AI แจ้งเตือนอาหาร–ยาวาร์ฟาริน<br>กรุณาเข้าสู่ระบบด้วยบัญชีโรงพยาบาล</p>
-    <div class="err" id="loginErr"></div>
-    <div class="fld"><label>ชื่อผู้ใช้</label>
-      <input id="lu" autocomplete="username" placeholder="เช่น nurse01"></div>
-    <div class="fld"><label>รหัสผ่าน</label>
-      <input id="lp" type="password" autocomplete="current-password"
-             onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <button class="btn" id="lbtn" onclick="doLogin()">เข้าสู่ระบบ</button>
-    <p class="mut" style="text-align:center;margin:14px 0 0;font-size:11.5px">
-      บัญชีทดสอบ: nutri01 / nurse01 / pharm01 / admin · รหัส 1234</p>
-</div>
-<header>
-  <!-- แทนที่ <header> เดิม -->
+
 <header>
   <h1>🩺 ระบบ AI แจ้งเตือนอาหาร–ยาวาร์ฟาริน</h1>
-  <div class="userbar">
-    <small id="hUser">Warfarin Food–Drug Interaction Alert System</small>
-    <button onclick="doLogout()">ออกจากระบบ</button>
-  </div>
+  <small>Warfarin Food–Drug Interaction Alert System · กลุ่มงานโภชนาการ</small>
 </header>
 
 <div class="wrap">
@@ -196,41 +156,15 @@ svg.inr{width:100%;min-width:330px;height:250px;display:block}
   </div>
   <div id="logOut"></div>
 </section>
-<!-- เพิ่มหน้า INR ก่อนปิด </div> ของ .wrap -->
-<section id="p-inr" class="page">
-  <div class="card">
-    <h3>📈 กราฟติดตามค่า INR รายผู้ป่วย</h3>
-    <div class="fld"><input id="iAN" list="anList" placeholder="กรอกเลข AN"></div>
-    <button class="btn acc" onclick="loadINR()">แสดงกราฟ INR</button>
-  </div>
-  <div id="inrOut"><div class="empty">กรอกเลข AN เพื่อดูแนวโน้มค่า INR</div></div>
 
-  <div class="card perm-inr_edit hidden" id="inrForm">
-    <h3>➕ บันทึกผลตรวจ INR ใหม่</h3>
-    <div class="grid">
-      <div class="fld"><label>วันที่ตรวจ</label><input type="date" id="fDate"></div>
-      <div class="fld"><label>ค่า INR</label><input type="number" step="0.1" id="fINR" placeholder="เช่น 2.5"></div>
-      <div class="fld"><label>PT (วินาที)</label><input type="number" step="0.1" id="fPT"></div>
-      <div class="fld"><label>Warfarin dose (mg/สัปดาห์)</label><input type="number" step="0.5" id="fDose"></div>
-      <div class="fld"><label>เป้าหมายต่ำสุด</label><input type="number" step="0.1" id="fMin" value="2.0"></div>
-      <div class="fld"><label>เป้าหมายสูงสุด</label><input type="number" step="0.1" id="fMax" value="3.0"></div>
-    </div>
-    <div class="fld"><label>หมายเหตุ</label><input id="fNote" placeholder="เช่น ปรับขนาดยา / มีเลือดออกตามไรฟัน"></div>
-    <button class="btn" onclick="saveINR()">💾 บันทึกและแจ้งเตือนอัตโนมัติ</button>
-    <p class="mut" style="margin:9px 0 0">หากค่านอกช่วงเป้าหมาย ระบบจะส่ง LINE แจ้งพยาบาลหอนั้นทันที</p>
-  </div>
-</section>
 </div>
 
 <nav>
-<!-- แทนที่ <nav> เดิม -->
-<nav>
-  <button class="on perm-ward"    data-p="p-ward" onclick="go(this)"><i>🏥</i>หอผู้ป่วย</button>
-  <button class="perm-scan"       data-p="p-scan" onclick="go(this)"><i>🤖</i>สแกนเมนู</button>
-  <button class="perm-summary"    data-p="p-sum"  onclick="go(this)"><i>📋</i>สรุปผู้ป่วย</button>
-  <button class="perm-inr"        data-p="p-inr"  onclick="go(this)"><i>📈</i>INR</button>
-  <button class="perm-report"     data-p="p-rep"  onclick="go(this)"><i>📊</i>รายงาน</button>
-  <button class="perm-log"        data-p="p-log"  onclick="go(this)"><i>🗂️</i>Log</button>
+  <button class="on" data-p="p-ward" onclick="go(this)"><i>🏥</i>หอผู้ป่วย</button>
+  <button data-p="p-scan" onclick="go(this)"><i>🤖</i>สแกนเมนู</button>
+  <button data-p="p-sum"  onclick="go(this)"><i>📋</i>สรุปผู้ป่วย</button>
+  <button data-p="p-rep"  onclick="go(this)"><i>📊</i>รายงาน</button>
+  <button data-p="p-log"  onclick="go(this)"><i>🗂️</i>Log</button>
 </nav>
 
 <div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
@@ -565,188 +499,6 @@ async function loadLogs(){
 
 document.getElementById('modal').onclick = e=>{ if(e.target.id==='modal') closeModal(); };
 boot();
-/* ================= AUTH & ROLE ================= */
-const SESSION_HOURS = 8;
-
-const PERMISSIONS = {
-  admin:        ['ward','scan','summary','report','log','inr','inr_edit','user_admin','line_admin'],
-  nutritionist: ['ward','scan','summary','report','inr'],            // นักโภชนาการ
-  nurse:        ['ward','summary','report','inr','inr_edit'],        // พยาบาล
-  pharmacist:   ['ward','summary','report','inr','inr_edit','log']   // เภสัชกร
-};
-const ROLE_TH = { admin:'ผู้ดูแลระบบ', nutritionist:'นักโภชนาการ',
-                  nurse:'พยาบาล', pharmacist:'เภสัชกร' };
-
-function hash_(pw, salt){
-  return Utilities.base64Encode(
-    Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, salt + '::' + pw, Utilities.Charset.UTF_8));
-}
-
-function login_(username, password){
-  const u = readAll_('USERS').filter(x=>
-        String(x.Username).toLowerCase() === String(username||'').toLowerCase())[0];
-  if (!u)  throw new Error('ไม่พบชื่อผู้ใช้นี้');
-  if (String(u.Active).toUpperCase() !== 'YES') throw new Error('บัญชีถูกระงับการใช้งาน');
-  if (hash_(password, u.Salt) !== u.PassHash)   throw new Error('รหัสผ่านไม่ถูกต้อง');
-
-  const token = Utilities.getUuid().replace(/-/g,'');
-  const exp = new Date(Date.now() + SESSION_HOURS*3600*1000);
-  append_('SESSIONS', {
-    Token: token, Username: u.Username, Role: u.Role, FullName: u.FullName, Ward: u.Ward,
-    IssuedAt: now_(), ExpireAt: Utilities.formatDate(exp, TZ, 'yyyy-MM-dd HH:mm:ss')
-  });
-  // อัปเดต LastLogin
-  const sh = sheet_('USERS'), vals = sh.getDataRange().getValues();
-  for (let i=1;i<vals.length;i++) if (String(vals[i][0])===String(u.Username)) sh.getRange(i+1,9).setValue(now_());
-
-  log_(u.Username,'LOGIN', u.Role, 'เข้าสู่ระบบสำเร็จ', 'SUCCESS');
-  return { token: token, username: u.Username, fullName: u.FullName, role: u.Role,
-           roleTH: ROLE_TH[u.Role]||u.Role, ward: u.Ward, perms: PERMISSIONS[u.Role]||[],
-           expireAt: Utilities.formatDate(exp, TZ, 'yyyy-MM-dd HH:mm') };
-}
-
-function auth_(token){
-  if (!token) throw new Error('AUTH_REQUIRED');
-  const s = readAll_('SESSIONS').filter(x=> x.Token === token)[0];
-  if (!s) throw new Error('AUTH_REQUIRED');
-  if (new Date(s.ExpireAt) < new Date()) throw new Error('SESSION_EXPIRED');
-  return s;
-}
-function need_(sess, perm){
-  const p = PERMISSIONS[sess.Role] || [];
-  if (p.indexOf(perm) < 0) throw new Error('สิทธิ์ไม่เพียงพอ ('+(ROLE_TH[sess.Role]||sess.Role)+' ไม่สามารถใช้เมนูนี้ได้)');
-}
-function logout_(token){
-  const sh = sheet_('SESSIONS'), v = sh.getDataRange().getValues();
-  for (let i=v.length-1;i>=1;i--) if (String(v[i][0])===String(token)) sh.deleteRow(i+1);
-  return { ok:true };
-}
-function createUser_(o){
-  const salt = Utilities.getUuid().slice(0,12);
-  append_('USERS', { Username:o.username, PassHash:hash_(o.password,salt), Salt:salt,
-    FullName:o.fullName, Role:o.role, Ward:o.ward||'', LineUserId:o.lineUserId||'',
-    Active:'YES', LastLogin:'' });
-  return { ok:true };
-}
-
-/* ---- ซ่อน/แสดงตามสิทธิ์ ---- */
-function applyPerms(){
-  document.getElementById('hUser').innerHTML =
-    `👤 ${esc(ME.fullName)} <span class="role-chip">${esc(ME.roleTH)}</span>` +
-    (ME.ward && ME.ward!=='*' ? ` <span class="role-chip">${esc(ME.ward)}</span>` : '');
-  document.querySelectorAll('[class*="perm-"]').forEach(el=>{
-    const m = String(el.className).match(/perm-([a-z_]+)/);
-    if(!m) return;
-    el.classList.toggle('hidden', ME.perms.indexOf(m[1]) < 0);
-  });
-  const first = document.querySelector('nav button:not(.hidden)');
-  if(first) go(first);
-}
-
-/* ============ INR CHART (SVG ไม่ต้องใช้ไลบรารี) ============ */
-function drawINR(rows){
-  const W=680,H=250,PL=44,PR=16,PT=18,PB=42;
-  const iw=W-PL-PR, ih=H-PT-PB;
-  const vals = rows.map(r=>+r.INR);
-  const tmin = Math.min.apply(null, rows.map(r=>+r.TargetMin));
-  const tmax = Math.max.apply(null, rows.map(r=>+r.TargetMax));
-  const lo = Math.min(0.8, Math.min.apply(null,vals)-0.5);
-  const hi = Math.max(tmax+1, Math.max.apply(null,vals)+0.5);
-  const X = i=> PL + (rows.length<2 ? iw/2 : i*iw/(rows.length-1));
-  const Y = v=> PT + ih - (v-lo)/(hi-lo)*ih;
-
-  let g='';
-  // แถบช่วงเป้าหมาย
-  g += `<rect x="${PL}" y="${Y(tmax)}" width="${iw}" height="${Y(tmin)-Y(tmax)}"
-         fill="#2e9e4f" opacity=".13"/>`;
-  g += `<line x1="${PL}" y1="${Y(tmin)}" x2="${PL+iw}" y2="${Y(tmin)}" stroke="#2e9e4f"
-         stroke-dasharray="5 4" stroke-width="1.4"/>`;
-  g += `<line x1="${PL}" y1="${Y(tmax)}" x2="${PL+iw}" y2="${Y(tmax)}" stroke="#2e9e4f"
-         stroke-dasharray="5 4" stroke-width="1.4"/>`;
-  // แกน Y
-  for(let v=Math.ceil(lo*2)/2; v<=hi; v+=0.5){
-    g += `<line x1="${PL}" y1="${Y(v)}" x2="${PL+iw}" y2="${Y(v)}" stroke="#e3e8ef" stroke-width="1"/>
-          <text x="${PL-8}" y="${Y(v)+4}" font-size="10" fill="#6b7785" text-anchor="end">${v.toFixed(1)}</text>`;
-  }
-  // เส้นกราฟ
-  const path = rows.map((r,i)=> (i?'L':'M')+X(i).toFixed(1)+' '+Y(+r.INR).toFixed(1)).join(' ');
-  g += `<path d="${path}" fill="none" stroke="#1b4d7e" stroke-width="2.6"
-         stroke-linejoin="round" stroke-linecap="round"/>`;
-  // จุด + ป้าย
-  rows.forEach((r,i)=>{
-    const v=+r.INR, out = v<+r.TargetMin || v>+r.TargetMax;
-    const c = out ? (v>+r.TargetMax ? '#d92c2c' : '#e08600') : '#2e9e4f';
-    g += `<circle cx="${X(i)}" cy="${Y(v)}" r="${out?6:4.8}" fill="${c}" stroke="#fff" stroke-width="2">
-            <title>${r.TestDate} · INR ${v}${r.WarfarinDose?' · '+r.WarfarinDose+' mg/wk':''}</title></circle>
-          <text x="${X(i)}" y="${Y(v)-12}" font-size="10.5" font-weight="700" fill="${c}"
-            text-anchor="middle">${v.toFixed(1)}</text>
-          <text x="${X(i)}" y="${H-16}" font-size="9.5" fill="#6b7785" text-anchor="middle"
-            transform="rotate(-32 ${X(i)} ${H-16})">${String(r.TestDate).slice(5)}</text>`;
-  });
-  return `<svg class="inr" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${g}</svg>`;
-}
-
-async function loadINR(){
-  const an = document.getElementById('iAN').value.trim();
-  const box = document.getElementById('inrOut');
-  if(!an){ box.innerHTML='<div class="empty">กรุณากรอกเลข AN</div>'; return; }
-  box.innerHTML='<div class="empty">กำลังโหลด…</div>';
-  try{
-    const d = await api({action:'inr', an:an});
-    if(!d.rows.length){ box.innerHTML='<div class="empty">ยังไม่มีผลตรวจ INR ของผู้ป่วยรายนี้</div>'; return; }
-    const s = d.stat;
-    const ttrColor = s.ttr>=65 ? 'linear-gradient(135deg,#1d7d3e,#2e9e4f)'
-                   : s.ttr>=50 ? 'linear-gradient(135deg,#c07000,#e08600)'
-                               : 'linear-gradient(135deg,#b32020,#d92c2c)';
-    box.innerHTML = `
-      <div class="card"><h3>📈 แนวโน้มค่า INR (AN ${esc(an)})</h3>
-        <div class="chartbox">${drawINR(d.rows)}</div>
-        <div class="legend">
-          <span><i style="background:#2e9e4f;opacity:.3"></i>ช่วงเป้าหมาย</span>
-          <span><i style="background:#2e9e4f"></i>อยู่ในเป้าหมาย</span>
-          <span><i style="background:#e08600"></i>ต่ำกว่าเป้าหมาย</span>
-          <span><i style="background:#d92c2c"></i>สูงกว่าเป้าหมาย</span>
-        </div></div>
-      <div class="card"><h3>📊 สรุปสถิติ</h3>
-        <div class="grid grid-3" style="grid-template-columns:repeat(2,1fr)">
-          <div class="kpi"><b>${s.last}</b><small>INR ล่าสุด</small></div>
-          <div class="kpi" style="background:${ttrColor}"><b>${s.ttr}%</b><small>TTR อยู่ในช่วงเป้าหมาย</small></div>
-          <div class="kpi" style="background:linear-gradient(135deg,#4a5c6e,#6b7785)"><b>${s.avg}</b><small>ค่าเฉลี่ย</small></div>
-          <div class="kpi" style="background:linear-gradient(135deg,#4a5c6e,#6b7785)"><b>${s.min}–${s.max}</b><small>ต่ำสุด–สูงสุด</small></div>
-        </div>
-        ${ s.ttr<65 ? '<div class="alert warn" style="margin-top:12px"><h4>⚠️ TTR ต่ำกว่า 65%</h4>ควรทบทวนความสม่ำเสมอของการรับประทานยาและปริมาณ Vitamin K ในอาหาร</div>' : '' }
-      </div>
-      <div class="card"><h3>🧾 ตารางผลตรวจ</h3><div class="scroll">
-        <table class="tbl"><thead><tr><th>วันที่</th><th>INR</th><th>PT (s)</th>
-          <th>ขนาดยา</th><th>เป้าหมาย</th><th>สถานะ</th><th>หมายเหตุ</th><th>ผู้บันทึก</th></tr></thead>
-        <tbody>${d.rows.slice().reverse().map(r=>{
-          const v=+r.INR, out = v<+r.TargetMin?'ต่ำ':v>+r.TargetMax?'สูง':'ปกติ';
-          const cl = out==='ปกติ'?'LOW':out==='สูง'?'HIGH':'MODERATE';
-          return `<tr><td>${esc(r.TestDate)}</td><td><b>${v}</b></td><td>${esc(r.PT_sec)}</td>
-            <td>${esc(r.WarfarinDose)}</td><td>${esc(r.TargetMin)}–${esc(r.TargetMax)}</td>
-            <td><span class="pill ${cl}">${out}</span></td><td>${esc(r.Note)}</td>
-            <td>${esc(r.RecordBy)}</td></tr>`; }).join('')}</tbody></table></div></div>`;
-    document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
-  }catch(e){ box.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(e)}</div>`; }
-}
-
-async function saveINR(){
-  const an = document.getElementById('iAN').value.trim();
-  const v  = document.getElementById('fINR').value;
-  if(!an || !v){ alert('กรุณากรอกเลข AN และค่า INR'); return; }
-  try{
-    const r = await api({action:'saveINR', payload:{
-      AN:an, TestDate:document.getElementById('fDate').value,
-      INR:v, PT_sec:document.getElementById('fPT').value,
-      WarfarinDose:document.getElementById('fDose').value,
-      TargetMin:document.getElementById('fMin').value,
-      TargetMax:document.getElementById('fMax').value,
-      Note:document.getElementById('fNote').value }});
-    alert('บันทึกสำเร็จ' + (r.notified ? `\n🔔 ค่าผิดช่วงเป้าหมาย — ส่ง LINE แจ้งพยาบาลแล้ว ${r.notified} ปลายทาง` : ''));
-    document.getElementById('fINR').value=''; document.getElementById('fNote').value='';
-    loadINR();
-  }catch(e){ alert('บันทึกไม่สำเร็จ: '+e); }
-}
 </script>
 </body>
 </html>
