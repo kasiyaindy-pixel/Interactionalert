@@ -565,53 +565,68 @@ async function loadLogs(){
 
 document.getElementById('modal').onclick = e=>{ if(e.target.id==='modal') closeModal(); };
 boot();
-/* ============ AUTH ============ */
-let ME = null;
-const TKKEY = 'wfa_token';
+/* ================= AUTH & ROLE ================= */
+const SESSION_HOURS = 8;
 
-function api(params){                       // แทนที่ api() เดิม — แนบ token ทุกครั้ง
-  return new Promise((res,rej)=>{
-    const cb = 'cb'+Date.now()+Math.floor(Math.random()*1000);
-    const t = setTimeout(()=>{ cleanup(); rej('หมดเวลาเชื่อมต่อ'); }, 25000);
-    window[cb] = d=>{ clearTimeout(t); cleanup();
-      if (d.ok) return res(d.data);
-      if (d.auth){ localStorage.removeItem(TKKEY); showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'); }
-      rej(d.error); };
-    const s = document.createElement('script');
-    params.token = localStorage.getItem(TKKEY) || '';
-    const qs = Object.keys(params).map(k=>{
-      const v = typeof params[k]==='object' ? JSON.stringify(params[k]) : params[k];
-      return encodeURIComponent(k)+'='+encodeURIComponent(v); }).join('&');
-    s.src = API+'?'+qs+'&callback='+cb;
-    s.onerror = ()=>{ clearTimeout(t); cleanup(); rej('เชื่อมต่อเครือข่ายไม่สำเร็จ'); };
-    document.body.appendChild(s);
-    function cleanup(){ delete window[cb]; s.remove(); }
+const PERMISSIONS = {
+  admin:        ['ward','scan','summary','report','log','inr','inr_edit','user_admin','line_admin'],
+  nutritionist: ['ward','scan','summary','report','inr'],            // นักโภชนาการ
+  nurse:        ['ward','summary','report','inr','inr_edit'],        // พยาบาล
+  pharmacist:   ['ward','summary','report','inr','inr_edit','log']   // เภสัชกร
+};
+const ROLE_TH = { admin:'ผู้ดูแลระบบ', nutritionist:'นักโภชนาการ',
+                  nurse:'พยาบาล', pharmacist:'เภสัชกร' };
+
+function hash_(pw, salt){
+  return Utilities.base64Encode(
+    Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, salt + '::' + pw, Utilities.Charset.UTF_8));
+}
+
+function login_(username, password){
+  const u = readAll_('USERS').filter(x=>
+        String(x.Username).toLowerCase() === String(username||'').toLowerCase())[0];
+  if (!u)  throw new Error('ไม่พบชื่อผู้ใช้นี้');
+  if (String(u.Active).toUpperCase() !== 'YES') throw new Error('บัญชีถูกระงับการใช้งาน');
+  if (hash_(password, u.Salt) !== u.PassHash)   throw new Error('รหัสผ่านไม่ถูกต้อง');
+
+  const token = Utilities.getUuid().replace(/-/g,'');
+  const exp = new Date(Date.now() + SESSION_HOURS*3600*1000);
+  append_('SESSIONS', {
+    Token: token, Username: u.Username, Role: u.Role, FullName: u.FullName, Ward: u.Ward,
+    IssuedAt: now_(), ExpireAt: Utilities.formatDate(exp, TZ, 'yyyy-MM-dd HH:mm:ss')
   });
+  // อัปเดต LastLogin
+  const sh = sheet_('USERS'), vals = sh.getDataRange().getValues();
+  for (let i=1;i<vals.length;i++) if (String(vals[i][0])===String(u.Username)) sh.getRange(i+1,9).setValue(now_());
+
+  log_(u.Username,'LOGIN', u.Role, 'เข้าสู่ระบบสำเร็จ', 'SUCCESS');
+  return { token: token, username: u.Username, fullName: u.FullName, role: u.Role,
+           roleTH: ROLE_TH[u.Role]||u.Role, ward: u.Ward, perms: PERMISSIONS[u.Role]||[],
+           expireAt: Utilities.formatDate(exp, TZ, 'yyyy-MM-dd HH:mm') };
 }
 
-function showLogin(msg){
-  document.getElementById('login').style.display='flex';
-  const e = document.getElementById('loginErr');
-  if(msg){ e.textContent = msg; e.style.display='block'; } else e.style.display='none';
+function auth_(token){
+  if (!token) throw new Error('AUTH_REQUIRED');
+  const s = readAll_('SESSIONS').filter(x=> x.Token === token)[0];
+  if (!s) throw new Error('AUTH_REQUIRED');
+  if (new Date(s.ExpireAt) < new Date()) throw new Error('SESSION_EXPIRED');
+  return s;
 }
-async function doLogin(){
-  const b = document.getElementById('lbtn');
-  b.disabled = true; b.textContent = 'กำลังตรวจสอบ…';
-  try{
-    const d = await api({action:'login',
-      username:document.getElementById('lu').value.trim(),
-      password:document.getElementById('lp').value});
-    localStorage.setItem(TKKEY, d.token);
-    ME = d;
-    document.getElementById('login').style.display='none';
-    document.getElementById('lp').value='';
-    applyPerms(); boot();
-  }catch(e){ showLogin(String(e)); }
-  finally{ b.disabled=false; b.textContent='เข้าสู่ระบบ'; }
+function need_(sess, perm){
+  const p = PERMISSIONS[sess.Role] || [];
+  if (p.indexOf(perm) < 0) throw new Error('สิทธิ์ไม่เพียงพอ ('+(ROLE_TH[sess.Role]||sess.Role)+' ไม่สามารถใช้เมนูนี้ได้)');
 }
-async function doLogout(){
-  try{ await api({action:'logout'}); }catch(e){}
-  localStorage.removeItem(TKKEY); ME=null; location.reload();
+function logout_(token){
+  const sh = sheet_('SESSIONS'), v = sh.getDataRange().getValues();
+  for (let i=v.length-1;i>=1;i--) if (String(v[i][0])===String(token)) sh.deleteRow(i+1);
+  return { ok:true };
+}
+function createUser_(o){
+  const salt = Utilities.getUuid().slice(0,12);
+  append_('USERS', { Username:o.username, PassHash:hash_(o.password,salt), Salt:salt,
+    FullName:o.fullName, Role:o.role, Ward:o.ward||'', LineUserId:o.lineUserId||'',
+    Active:'YES', LastLogin:'' });
+  return { ok:true };
 }
 
 /* ---- ซ่อน/แสดงตามสิทธิ์ ---- */
